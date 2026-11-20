@@ -21,16 +21,16 @@
   // ── 공통: 파라미터 읽기 ──
   const p = new URLSearchParams(location.search);
   const hex = v => /^[0-9a-fA-F]{3,8}$/.test(v || "") ? "#" + v : null;
-  document.body.style.background = hex(p.get("background")) || "#000000";
-  document.body.style.color      = hex(p.get("text"))       || "#FFFFFF";
-  const content = p.get("content") || "";
+  document.body.style.background = hex(p.get("bg")) || "#000000";  // 배경색 (bg)
+  document.body.style.color      = hex(p.get("fg")) || "#FFFFFF";  // 글자색 (fg)
+  const title = p.get("title") || "";
 
   // ── 위젯 전용 파라미터 ──
   // const something = p.get("something") || "기본값";
 
   // ── 그리기 ──
   document.getElementById("main").textContent = "Hello";
-  document.getElementById("sub").textContent  = content;
+  document.getElementById("sub").textContent  = title;
 </script>
 </body>
 </html>
