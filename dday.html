@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-Day Widget</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    border-radius: 12px; overflow: hidden;
+  }
+  #dday   { font-size: clamp(32px, 14vw, 96px); font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  #label  { font-size: clamp(14px, 4vw, 22px); margin-top: 10px; opacity: 0.85; }
+  #date   { font-size: clamp(11px, 3vw, 14px); margin-top: 6px; opacity: 0.55; }
+</style>
+</head>
+<body>
+  <div id="dday">D-?</div>
+  <div id="label"></div>
+  <div id="date"></div>
+
+<script>
+  // 1) 주소창의 ?key=value 읽기
+  const p = new URLSearchParams(location.search);
+  const raw     = p.get("date")       || "20270101";       // YYYYMMDD
+  const content = p.get("content")    || "";
+  const bg      = p.get("background") || "000000";         // # 없이 hex
+  const fg      = p.get("text")       || "FFFFFF";
+
+  // 2) 색 적용 (hex 형식만 허용)
+  const hex = v => /^[0-9a-fA-F]{3,8}$/.test(v) ? "#" + v : null;
+  document.body.style.background = hex(bg) || "#000";
+  document.body.style.color      = hex(fg) || "#fff";
+
+  // 3) 날짜 계산 (자정 기준)
+  const y = +raw.slice(0, 4), m = +raw.slice(4, 6) - 1, d = +raw.slice(6, 8);
+  const target = new Date(y, m, d);
+  const today  = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.round((target - today) / 86400000);
+
+  document.getElementById("dday").textContent =
+    diff > 0 ? `D-${diff}` : diff === 0 ? "D-DAY" : `D+${-diff}`;
+  document.getElementById("label").textContent = content;   // textContent라 HTML 주입 안전
+  document.getElementById("date").textContent =
+    `${y}.${String(m + 1).padStart(2, "0")}.${String(d).padStart(2, "0")}`;
+</script>
+</body>
+</html>
