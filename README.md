@@ -15,6 +15,7 @@ https://chungsungyeon.github.io/notion-widgets/{위젯이름}/?key=value&key=val
 | 위젯 | 설명 | 예시 링크 |
 |---|---|---|
 | [dday](#dday) | 특정 날짜까지 남은 날(D-n) / 지난 날(D+n) | `/dday/?date=20270101&title=BYE2027` |
+| [pomodoro](#pomodoro) | 집중/휴식을 번갈아 재는 뽀모도로 타이머 | `/pomodoro/?work=25&break=5&title=공부` |
 | _(추가 예정)_ | | |
 
 ---
@@ -119,3 +120,25 @@ notion-widgets/
 ```
 /dday/?date=20270101&title=BYE2027&bg=000000&fg=CCEEFF
 ```
+
+### pomodoro
+
+집중(FOCUS)과 휴식(BREAK)을 번갈아 재는 타이머입니다.
+`Start`/`Pause`로 시작·일시정지, `Reset`으로 처음(FOCUS · 1)으로 돌아갑니다.
+한 세션이 끝나면 알림음이 울리고, 다음 세션은 `Start`를 눌러야 시작합니다.
+
+| 파라미터 | 형식 | 기본값 | 설명 |
+|---|---|---|---|
+| `work` | 정수(분), 1~180 | `25` | 집중 시간 |
+| `break` | 정수(분), 1~180 | `5` | 휴식 시간 |
+| `sound` | `1` / `0` | `1` | 세션 종료 알림음 |
+| `title` | 문자열 | (없음) | 타이머 아래 표시할 문구 |
+| `bg` | hex | `000000` | 배경색 |
+| `fg` | hex | `FFFFFF` | 글자색 |
+
+```
+/pomodoro/?work=25&break=5&title=공부&bg=191919&fg=eeeeee
+```
+
+- 새로고침하면 타이머가 처음으로 돌아갑니다 (상태 저장 안 함)
+- 탭을 오래 백그라운드에 두면 브라우저가 타이머를 늦게 돌려서, 알림음이 조금 늦게 울릴 수 있습니다 (남은 시간 자체는 정확)
