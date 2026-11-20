@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomodoro Widget</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    user-select: none;
+  }
+  #mode  { font-size: clamp(11px, 3vw, 14px); letter-spacing: 0.15em; opacity: 0.6; }
+  #time  { font-size: clamp(32px, 14vw, 96px); font-weight: 800; letter-spacing: -0.02em; line-height: 1;
+           margin-top: 8px; font-variant-numeric: tabular-nums; }
+  #bar   { position: relative; width: min(60vw, 240px); height: 3px; margin-top: 14px;
+           border-radius: 2px; overflow: hidden; }
+  #track, #fill { position: absolute; inset: 0; background: currentColor; }
+  #track { opacity: 0.15; }
+  #fill  { opacity: 0.85; transform-origin: left; transform: scaleX(0); }
+  #title { font-size: clamp(14px, 4vw, 22px); margin-top: 12px; opacity: 0.85; }
+  #title:empty { display: none; }
+  #controls { display: flex; gap: 8px; margin-top: 14px; }
+  button {
+    font: inherit; font-size: clamp(12px, 3.5vw, 14px); color: inherit; background: transparent;
+    border: 1px solid currentColor; border-radius: 999px; padding: 5px 16px;
+    opacity: 0.6; cursor: pointer;
+  }
+  button:hover { opacity: 1; }
+</style>
+</head>
+<body>
+  <div id="mode">FOCUS</div>
+  <div id="time">25:00</div>
+  <div id="bar"><div id="track"></div><div id="fill"></div></div>
+  <div id="title"></div>
+  <div id="controls">
+    <button id="toggle">Start</button>
+    <button id="reset">Reset</button>
+  </div>
+
+<script>
+  // ── 공통: 파라미터 읽기 ──
+  const p = new URLSearchParams(location.search);
+  const hex = v => /^[0-9a-fA-F]{3,8}$/.test(v || "") ? "#" + v : null;
+  document.body.style.background = hex(p.get("bg")) || "#000000";  // 배경색 (bg)
+  document.body.style.color      = hex(p.get("fg")) || "#FFFFFF";  // 글자색 (fg)
+  const title = p.get("title") || "";
+
+  // ── 위젯 전용 파라미터 ──
+  // 1~180 사이 정수(분)만 허용, 아니면 기본값
+  const mins = (v, def) => { const n = Number(v); return Number.isInteger(n) && n >= 1 && n <= 180 ? n : def; };
+  const WORK  = mins(p.get("work"), 25) * 60000;   // 집중 시간 (ms)
+  const BREAK = mins(p.get("break"), 5) * 60000;   // 휴식 시간 (ms)
+  const SOUND = p.get("sound") !== "0";            // 끝날 때 알림음
+
+  // ── 상태 ──
+  let mode = "work";      // "work" | "break"
+  let round = 1;          // 몇 번째 집중인지
+  let remaining = WORK;   // 남은 시간 (ms)
+  let endAt = null;       // 실행 중이면 끝나는 시각, 멈춤이면 null
+  let timer = null;
+  let audio = null;
+
+  const $ = id => document.getElementById(id);
+  const duration = () => mode === "work" ? WORK : BREAK;
+  const fmt = ms => {
+    const s = Math.ceil(ms / 1000);
+    return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  };
+
+  // ── 그리기 ──
+  function render() {
+    $("mode").textContent   = mode === "work" ? `FOCUS · ${round}` : "BREAK";
+    $("time").textContent   = fmt(remaining);
+    $("fill").style.transform = `scaleX(${1 - remaining / duration()})`;
+    $("toggle").textContent = endAt ? "Pause" : "Start";
+  }
+
+  // 남은 시간을 매번 "끝나는 시각 - 지금"으로 계산해서,
+  // 탭이 백그라운드라 setInterval이 늦게 돌아도 시간이 밀리지 않음
+  function tick() {
+    remaining = Math.max(0, endAt - Date.now());
+    if (remaining === 0) finish();
+    else render();
+  }
+
+  function start() {
+    if (SOUND && !audio) {   // 브라우저는 클릭 시점에만 소리를 허용하므로 여기서 준비
+      try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+    }
+    endAt = Date.now() + remaining;
+    timer = setInterval(tick, 250);
+    render();
+  }
+
+  function pause() {
+    clearInterval(timer);
+    remaining = Math.max(0, endAt - Date.now());
+    endAt = null;
+    render();
+  }
+
+  function finish() {
+    clearInterval(timer);
+    endAt = null;
+    beep();
+    if (mode === "work") { mode = "break"; }
+    else { mode = "work"; round++; }
+    remaining = duration();
+    render();   // 다음 세션은 Start를 눌러야 시작
+  }
+
+  function reset() {
+    clearInterval(timer);
+    endAt = null;
+    mode = "work"; round = 1; remaining = WORK;
+    render();
+  }
+
+  // 띵-띵-띵 (파일 없이 브라우저에서 소리 생성)
+  function beep() {
+    if (!audio) return;
+    const t0 = audio.currentTime;
+    [0, 0.35, 0.7].forEach(t => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = 880;
+      o.connect(g); g.connect(audio.destination);
+      g.gain.setValueAtTime(0.0001, t0 + t);
+      g.gain.exponentialRampToValueAtTime(0.3, t0 + t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + t + 0.25);
+      o.start(t0 + t); o.stop(t0 + t + 0.3);
+    });
+  }
+
+  $("toggle").addEventListener("click", () => endAt ? pause() : start());
+  $("reset").addEventListener("click", reset);
+  document.addEventListener("visibilitychange", () => { if (endAt) tick(); });  // 탭 돌아오면 즉시 갱신
+
+  $("title").textContent = title;   // textContent라 HTML 주입 안전
+  render();
+</script>
+</body>
+</html>
