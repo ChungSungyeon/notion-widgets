@@ -22,8 +22,10 @@ https://chungsungyeon.github.io/notion-widgets/{위젯이름}/?key=value&key=val
 ## 폴더 구조
 
 ```
-my-widgets/
+notion-widgets/
 ├── README.md
+├── _template/
+│   └── index.html      ← 새 위젯을 만들 때 복사해서 시작
 ├── dday/
 │   └── index.html
 └── {위젯이름}/
@@ -33,6 +35,7 @@ my-widgets/
 - 위젯 하나 = 폴더 하나 + `index.html`
 - 폴더 이름이 곧 URL 경로가 됩니다 (`/dday/` → `dday/index.html`)
 - 폴더 이름은 **영문 소문자 + 하이픈**으로 씁니다 (예: `year-progress`)
+- `_`로 시작하는 폴더(`_template/`)는 위젯이 아닌 보조용이며, 사이트에는 배포되지 않습니다
 
 ---
 
@@ -43,11 +46,13 @@ my-widgets/
 
 | 파라미터 | 형식 | 기본값 | 설명 |
 |---|---|---|---|
-| `color` | hex, `#` 없이 (`000000`, `fff`) | `000000` | 배경색 |
-| `text` | hex, `#` 없이 | `FFFFFF` | 글자색 |
+| `bg` | hex, `#` 없이 (`000000`, `fff`) | `000000` | 배경색 |
+| `fg` | hex, `#` 없이 | `FFFFFF` | 글자색 |
 | `title` | 문자열 | 위젯마다 다름 | 표시할 문구/라벨 |
 
-> 노션 다크모드 배경과 맞추려면 `color=191919`, 라이트모드는 `color=ffffff`
+> 노션 다크모드 배경과 맞추려면 `bg=191919`, 라이트모드는 `bg=ffffff`
+
+색이 더 필요한 위젯은 같은 규칙으로 이름을 붙입니다: `accent`(강조색), `sub`(보조 글자색)
 
 ---
 
@@ -65,11 +70,12 @@ my-widgets/
 
 ## 새 위젯 추가하기
 
-1. `{위젯이름}/` 폴더를 만들어서, 안에 `index.html` 파일을 넣는다.
+1. `_template/` 폴더를 복사해서 `{위젯이름}/`으로 이름을 바꿉니다
 2. `index.html`에서 위젯 전용 파라미터와 그리는 로직을 작성합니다
 3. 브라우저로 파일을 직접 열어서 확인합니다
-   (`file:///.../year-progress/index.html?color=191919&text=eeeeee`)
+   (`file:///.../year-progress/index.html?bg=191919&fg=eeeeee`)
 4. push → 1~2분 후 `https://chungsungyeon.github.io/notion-widgets/year-progress/` 에서 확인
+5. 이 README의 **위젯 목록**과 **위젯별 문서**에 항목을 추가합니다
 
 ### 위젯 코드 체크리스트
 
@@ -107,9 +113,9 @@ my-widgets/
 |---|---|---|---|
 | `date` | `YYYYMMDD` | `20270101` | 기준 날짜 |
 | `title` | 문자열 | (없음) | 숫자 아래 표시할 문구 |
-| `color` | hex | `000000` | 배경색 |
-| `text` | hex | `FFFFFF` | 글자색 |
+| `bg` | hex | `000000` | 배경색 |
+| `fg` | hex | `FFFFFF` | 글자색 |
 
 ```
-/dday/?date=20270101&content=BYE2027&color=000000&text=CCEEFF
+/dday/?date=20270101&title=BYE2027&bg=000000&fg=CCEEFF
 ```
