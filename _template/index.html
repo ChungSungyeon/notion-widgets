@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Widget</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: -apple-system, "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  }
+  #main { font-size: clamp(24px, 10vw, 72px); font-weight: 800; }
+  #sub  { font-size: clamp(12px, 4vw, 20px); margin-top: 8px; opacity: 0.8; }
+</style>
+</head>
+<body>
+  <div id="main"></div>
+  <div id="sub"></div>
+<script>
+  // ── 공통: 파라미터 읽기 ──
+  const p = new URLSearchParams(location.search);
+  const hex = v => /^[0-9a-fA-F]{3,8}$/.test(v || "") ? "#" + v : null;
+  document.body.style.background = hex(p.get("background")) || "#000000";
+  document.body.style.color      = hex(p.get("text"))       || "#FFFFFF";
+  const content = p.get("content") || "";
+
+  // ── 위젯 전용 파라미터 ──
+  // const something = p.get("something") || "기본값";
+
+  // ── 그리기 ──
+  document.getElementById("main").textContent = "Hello";
+  document.getElementById("sub").textContent  = content;
+</script>
+</body>
+</html>
