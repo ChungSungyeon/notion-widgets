@@ -14,7 +14,7 @@ https://chungsungyeon.github.io/notion-widgets/{위젯이름}/?key=value&key=val
 
 | 위젯 | 설명 | 예시 링크 |
 |---|---|---|
-| [dday](#dday) | 특정 날짜까지 남은 날(D-n) / 지난 날(D+n) | `/dday/?date=20270101&content=BYE2027` |
+| [dday](#dday) | 특정 날짜까지 남은 날(D-n) / 지난 날(D+n) | `/dday/?date=20270101&title=BYE2027` |
 | _(추가 예정)_ | | |
 
 ---
